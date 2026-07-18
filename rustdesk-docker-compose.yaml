@@ -1,0 +1,56 @@
+# Documentation: https://rustdesk.com/docs/en/self-host/rustdesk-server-oss/docker/
+# Coolify discussion: https://github.com/coollabsio/coolify/discussions/9453
+#
+# Coolify notes:
+# - Do not deploy this as "Raw Compose Deployment"; the SERVICE_* variables below
+#   rely on Coolify's compose magic environment variable handling.
+# - SERVICE_FQDN_RUSTDESK lets you assign/edit the public hostname in Coolify
+#   (e.g. rustdesk.10.0.0.57.sslip.io — same pattern as Docmost).
+# - RustDesk clients use that hostname with published ports (normally 21116 ID
+#   server and 21117 relay). Core protocol is raw TCP/UDP — publish ports on the
+#   host; do not rely only on Coolify's HTTP reverse proxy.
+# - Uses rustdesk-server-s6 so both hbbs + hbbr run under one supervised
+#   container with a real /usr/bin/healthcheck.sh (see discussion comments).
+# - Open 21115–21119 on the server/provider firewall (UDP required on 21116).
+
+name: rustdesk
+
+services:
+  rustdesk:
+    image: 'rustdesk/rustdesk-server-s6:${RUSTDESK_VERSION:-latest}'
+    restart: unless-stopped
+    environment:
+      # Coolify magic: creates a domain field (e.g. rustdesk.10.0.0.57.sslip.io)
+      - SERVICE_FQDN_RUSTDESK
+      # Optional: Traefik routes for web-client websocket paths
+      - SERVICE_URL_RUSTDESK_21118=/ws/id
+      - SERVICE_URL_RUSTDESK_21119=/ws/relay
+      # hbbs -r <relay> — must be the public hostname clients use
+      - RELAY=${SERVICE_FQDN_RUSTDESK}:${RUSTDESK_HBBR_PORT:-21117}
+      - ENCRYPTED_ONLY=${ENCRYPTED_ONLY:-0}
+      - ALWAYS_USE_RELAY=${ALWAYS_USE_RELAY:-N}
+      - RUST_LOG=${RUST_LOG:-info}
+    volumes:
+      - rustdesk-data:/data
+    ports:
+      # NAT type test
+      - '${RUSTDESK_HBBS_NAT_PORT:-21115}:21115/tcp'
+      # ID / rendezvous (TCP + UDP required)
+      - '${RUSTDESK_HBBS_PORT:-21116}:21116/tcp'
+      - '${RUSTDESK_HBBS_PORT:-21116}:21116/udp'
+      # Relay
+      - '${RUSTDESK_HBBR_PORT:-21117}:21117/tcp'
+      # Web client websockets (optional)
+      - '${RUSTDESK_HBBS_WS_PORT:-21118}:21118/tcp'
+      - '${RUSTDESK_HBBR_WS_PORT:-21119}:21119/tcp'
+    healthcheck:
+      test:
+        - CMD
+        - /usr/bin/healthcheck.sh
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  rustdesk-data:

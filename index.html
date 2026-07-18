@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustDesk on Coolify</title>
+    <meta name="description" content="Self-host RustDesk Server on Coolify with health checks, host-published ports, and sslip.io domains. Coolify-ready Docker Compose.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖥️</text></svg>">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-muted: #666666;
+            --accent: #3b82f6;
+            --border: #e5e5e5;
+            --code-bg: #f5f5f5;
+            --card-bg: #fafafa;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0d0d0d;
+                --text: #f5f5f5;
+                --text-muted: #a3a3a3;
+                --accent: #60a5fa;
+                --border: #262626;
+                --code-bg: #1a1a1a;
+                --card-bg: #141414;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .badges {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .badges img {
+            height: 20px;
+        }
+
+        section {
+            margin-bottom: 2.5rem;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .steps {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .step {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .step:last-child {
+            border-bottom: none;
+        }
+
+        .step-num {
+            display: inline-block;
+            width: 1.5rem;
+            height: 1.5rem;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+            line-height: 1.5rem;
+            margin-right: 0.75rem;
+        }
+
+        code {
+            background: var(--code-bg);
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+
+        .features {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .feature-icon {
+            flex-shrink: 0;
+            width: 1.25rem;
+            text-align: center;
+        }
+
+        .links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent);
+            color: white;
+            padding: 0.625rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .note {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🖥️ RustDesk on Coolify</h1>
+            <p class="tagline">Self-host RustDesk Server with Coolify-ready Docker Compose</p>
+            <div class="badges">
+                <img src="https://img.shields.io/github/stars/pakeku/rustdesk-on-coolify?style=flat" alt="GitHub stars">
+                <img src="https://img.shields.io/github/license/pakeku/rustdesk-on-coolify?style=flat" alt="License">
+            </div>
+        </header>
+
+        <section>
+            <h2>What's included</h2>
+            <div class="features">
+                <div class="feature">
+                    <span class="feature-icon">✅</span>
+                    <span>Coolify-native Docker Compose configuration</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">✅</span>
+                    <span>hbbs + hbbr via <code>rustdesk-server-s6</code></span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">✅</span>
+                    <span>Health checks with <code>/usr/bin/healthcheck.sh</code></span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">✅</span>
+                    <span>Domain support like Docmost (<code>rustdesk.10.0.0.57.sslip.io</code>)</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">✅</span>
+                    <span>Host-published TCP/UDP ports for real RustDesk traffic</span>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Stack</h2>
+            <div class="stack">
+                <span class="badge">RustDesk Server</span>
+                <span class="badge">hbbs</span>
+                <span class="badge">hbbr</span>
+                <span class="badge">s6</span>
+                <span class="badge">Coolify</span>
+            </div>
+        </section>
+
+        <section>
+            <h2>Quick Start</h2>
+            <div class="steps">
+                <div class="step">
+                    <span class="step-num">1</span>
+                    Create a new <strong>Docker Compose Empty</strong> resource in Coolify
+                </div>
+                <div class="step">
+                    <span class="step-num">2</span>
+                    Copy the contents of <a href="https://github.com/pakeku/rustdesk-on-coolify/blob/master/rustdesk-docker-compose.yaml"><code>rustdesk-docker-compose.yaml</code></a>
+                </div>
+                <div class="step">
+                    <span class="step-num">3</span>
+                    Set domain e.g. <code>rustdesk.10.0.0.57.sslip.io</code> (Docmost-style)
+                </div>
+                <div class="step">
+                    <span class="step-num">4</span>
+                    Open ports 21115–21119 (UDP on 21116) and deploy
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="note">
+                <strong>Note:</strong> RustDesk is not a normal HTTP app. Publish the RustDesk ports on the host and point clients at your Coolify domain + ports 21116 / 21117 with the server public key.
+            </div>
+        </section>
+
+        <section>
+            <div class="links">
+                <a href="https://github.com/pakeku/rustdesk-on-coolify" class="btn">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                    View on GitHub
+                </a>
+                <a href="https://github.com/coollabsio/coolify/discussions/9453" class="btn btn-secondary">Discussion #9453</a>
+                <a href="https://rustdesk.com" class="btn btn-secondary">RustDesk</a>
+                <a href="https://coolify.io" class="btn btn-secondary">Coolify</a>
+            </div>
+        </section>
+
+        <footer>
+            <p>Made with ☕ by <a href="https://www.itcat6.com/">IT Cat</a></p>
+        </footer>
+    </div>
+</body>
+</html>
