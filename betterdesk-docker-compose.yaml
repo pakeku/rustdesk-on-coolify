@@ -1,0 +1,100 @@
+# BetterDesk on Coolify
+# Upstream: https://github.com/UNITRONIX/BetterDesk
+# Based on docker-compose.quick.single.yml (all-in-one image)
+#
+# Coolify notes:
+# - Use "Docker Compose Empty" (not Raw Compose) so SERVICE_* magic works.
+# - SERVICE_URL_BETTERDESK_5000 → assign domain e.g. betterdesk.10.0.0.57.sslip.io
+#   Traefik reverse-proxies HTTP to the web console (port 5000).
+# - Signal/relay/API are host-published TCP/UDP (not HTTP). Open them in the firewall.
+# - Set RELAY_SERVERS to a host clients can reach (LAN IP or hostname:21117).
+# - First boot only: ADMIN_PASSWORD seeds the admin user.
+
+name: betterdesk
+
+services:
+  betterdesk:
+    image: 'ghcr.io/unitronix/betterdesk:${BETTERDESK_IMAGE_TAG:-3.3.150}'
+    restart: unless-stopped
+    environment:
+      # Coolify magic: reverse-proxy the web console (port 5000)
+      # Set domain in Coolify UI, e.g. betterdesk.10.0.0.57.sslip.io
+      - SERVICE_URL_BETTERDESK_5000
+
+      - NODE_ENV=production
+      - PORT=5000
+      - HOST=0.0.0.0
+      - API_HOST=0.0.0.0
+      - API_ENABLED=false
+      - ENCRYPTED_ONLY=1
+      - SERVER_BACKEND=betterdesk
+      - HBBS_API_URL=http://127.0.0.1:21121/api
+      - BETTERDESK_API_URL=http://127.0.0.1:21121/api
+      - RUSTDESK_PATH=/opt/rustdesk
+      - DATA_DIR=/app/data
+      - DB_PATH=/opt/rustdesk/db_v2.sqlite3
+      - PUB_KEY_PATH=/opt/rustdesk/id_ed25519.pub
+      - API_KEY_PATH=/opt/rustdesk/.api_key
+      - AUTH_DB_PATH=/app/data/auth.db
+      - DOCKER=true
+      - BETTERDESK_UPDATE_MODE=image
+      - BETTERDESK_DOCKER_LAYOUT=single
+      - BETTERDESK_IMAGE_TAG=${BETTERDESK_IMAGE_TAG:-3.3.150}
+      - DB_TYPE=${DB_TYPE:-sqlite}
+      - TZ=${TZ:-UTC}
+
+      # MUST be reachable by RustDesk clients (host LAN/public IP, not a Docker IP)
+      # Example LAN: RELAY_SERVERS=10.0.0.57:21117
+      - RELAY_SERVERS=${RELAY_SERVERS:?set RELAY_SERVERS e.g. 10.0.0.57:21117}
+
+      # open = any client can register (simplest for first lab setup)
+      # managed = approve devices in the console (BetterDesk default for fresh volumes)
+      - ENROLLMENT_MODE=${ENROLLMENT_MODE:-open}
+
+      - SIGNAL_RATE_LIMIT_PER_IP=${SIGNAL_RATE_LIMIT_PER_IP:-20}
+
+      # First-run admin only (change password in the UI after login)
+      - INIT_ADMIN_USER=${ADMIN_USERNAME:-admin}
+      - INIT_ADMIN_PASS=${ADMIN_PASSWORD:-}
+      - DEFAULT_ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - DEFAULT_ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+      - SESSION_SECRET=${SESSION_SECRET:-}
+
+      # If Coolify Traefik sits in front of the console
+      - TRUST_PROXY=${TRUST_PROXY:-Y}
+    volumes:
+      - betterdesk-data:/opt/rustdesk
+      - betterdesk-console-data:/app/data
+    ports:
+      # Web console is preferably reached via Coolify domain (SERVICE_URL above).
+      # Optional host publish if you also want http://HOST:5000
+      - '${BETTERDESK_CONSOLE_PORT:-5000}:5000/tcp'
+      # RustDesk protocol + API (host network ports)
+      - '${BETTERDESK_NAT_PORT:-21115}:21115/tcp'
+      - '${BETTERDESK_SIGNAL_PORT:-21116}:21116/tcp'
+      - '${BETTERDESK_SIGNAL_PORT:-21116}:21116/udp'
+      - '${BETTERDESK_RELAY_PORT:-21117}:21117/tcp'
+      - '${BETTERDESK_WS_SIGNAL_PORT:-21118}:21118/tcp'
+      - '${BETTERDESK_WS_RELAY_PORT:-21119}:21119/tcp'
+      - '${BETTERDESK_API_PORT:-21121}:21121/tcp'
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'curl -sf http://localhost:21121/api/health && curl -sf http://localhost:5000/health'
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - CHOWN
+      - FOWNER
+
+volumes:
+  betterdesk-data:
+  betterdesk-console-data:
