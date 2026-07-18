@@ -87,7 +87,6 @@ BETTERDESK_IMAGE_TAG=3.3.2
 > **Image tags:** Upstream changelog versions are often ahead of what is published to GHCR.
 > Confirmed pullable tags include: `latest`, `3.3.2`, `3.3.0`, `3.2.0`, `3.1.0`, `3.0.0`.
 > If Coolify says `not found`, switch `BETTERDESK_IMAGE_TAG` (or the compose default) to one of those.
-```
 
 | Variable | Purpose |
 |----------|---------|
