@@ -14,7 +14,9 @@ name: betterdesk
 
 services:
   betterdesk:
-    image: 'ghcr.io/unitronix/betterdesk:${BETTERDESK_IMAGE_TAG:-3.3.150}'
+    # Tags that exist on GHCR (verified): latest, 3.3.2, 3.3.0, 3.2.0, …
+    # Do NOT use changelog-only versions (e.g. 3.3.150) — they often are not published.
+    image: 'ghcr.io/unitronix/betterdesk:${BETTERDESK_IMAGE_TAG:-3.3.2}'
     restart: unless-stopped
     environment:
       # Coolify magic: reverse-proxy the web console (port 5000)
@@ -39,7 +41,7 @@ services:
       - DOCKER=true
       - BETTERDESK_UPDATE_MODE=image
       - BETTERDESK_DOCKER_LAYOUT=single
-      - BETTERDESK_IMAGE_TAG=${BETTERDESK_IMAGE_TAG:-3.3.150}
+      - BETTERDESK_IMAGE_TAG=${BETTERDESK_IMAGE_TAG:-3.3.2}
       - DB_TYPE=${DB_TYPE:-sqlite}
       - TZ=${TZ:-UTC}
 

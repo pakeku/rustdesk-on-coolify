@@ -80,8 +80,13 @@ ADMIN_PASSWORD=ChangeMe_StrongPassword_123
 # Lab-friendly: allow devices without manual approval
 ENROLLMENT_MODE=open
 
-# Optional pin
-BETTERDESK_IMAGE_TAG=3.3.150
+# Optional pin — use a tag that exists on ghcr.io (see below)
+BETTERDESK_IMAGE_TAG=3.3.2
+```
+
+> **Image tags:** Upstream changelog versions are often ahead of what is published to GHCR.
+> Confirmed pullable tags include: `latest`, `3.3.2`, `3.3.0`, `3.2.0`, `3.1.0`, `3.0.0`.
+> If Coolify says `not found`, switch `BETTERDESK_IMAGE_TAG` (or the compose default) to one of those.
 ```
 
 | Variable | Purpose |
