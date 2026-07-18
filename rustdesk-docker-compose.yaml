@@ -5,7 +5,7 @@
 # - Do not deploy this as "Raw Compose Deployment"; the SERVICE_* variables below
 #   rely on Coolify's compose magic environment variable handling.
 # - SERVICE_FQDN_RUSTDESK lets you assign/edit the public hostname in Coolify
-#   (e.g. rustdesk.10.0.0.57.sslip.io — same pattern as Docmost).
+#   (e.g. rustdesk.yourdomain.com or rustdesk.<your-server-ip>.sslip.io).
 # - RustDesk clients use that hostname with published ports (normally 21116 ID
 #   server and 21117 relay). Core protocol is raw TCP/UDP — publish ports on the
 #   host; do not rely only on Coolify's HTTP reverse proxy.
@@ -20,7 +20,7 @@ services:
     image: 'rustdesk/rustdesk-server-s6:${RUSTDESK_VERSION:-latest}'
     restart: unless-stopped
     environment:
-      # Coolify magic: creates a domain field (e.g. rustdesk.10.0.0.57.sslip.io)
+      # Coolify magic: creates a domain field (e.g. rustdesk.yourdomain.com)
       - SERVICE_FQDN_RUSTDESK
       # Optional: Traefik routes for web-client websocket paths
       - SERVICE_URL_RUSTDESK_21118=/ws/id

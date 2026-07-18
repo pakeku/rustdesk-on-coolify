@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RustDesk on Coolify</title>
-    <meta name="description" content="Self-host RustDesk Server on Coolify with health checks, host-published ports, and sslip.io domains. Coolify-ready Docker Compose.">
+    <meta name="description" content="Self-host RustDesk Server on Coolify with health checks and host-published ports. Coolify-ready Docker Compose.">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖥️</text></svg>">
     <style>
         :root {
@@ -243,7 +243,7 @@
                 </div>
                 <div class="feature">
                     <span class="feature-icon">✅</span>
-                    <span>Domain support like Docmost (<code>rustdesk.10.0.0.57.sslip.io</code>)</span>
+                    <span>Coolify domain support (<code>rustdesk.yourdomain.com</code>)</span>
                 </div>
                 <div class="feature">
                     <span class="feature-icon">✅</span>
@@ -276,7 +276,7 @@
                 </div>
                 <div class="step">
                     <span class="step-num">3</span>
-                    Set domain e.g. <code>rustdesk.10.0.0.57.sslip.io</code> (Docmost-style)
+                    Set domain e.g. <code>rustdesk.yourdomain.com</code>
                 </div>
                 <div class="step">
                     <span class="step-num">4</span>
@@ -287,7 +287,7 @@
 
         <section>
             <div class="note">
-                <strong>Note:</strong> RustDesk is not a normal HTTP app. Publish the RustDesk ports on the host and point clients at your Coolify domain + ports 21116 / 21117 with the server public key.
+                <strong>Note:</strong> RustDesk is not a website — the browser will not load a UI. Publish ports on the host and configure the RustDesk client with your domain (or <code>rustdesk.&lt;your-server-ip&gt;.sslip.io</code>) on ports 21116 / 21117 plus the server public key.
             </div>
         </section>
 
